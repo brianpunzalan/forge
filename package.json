@@ -1,0 +1,44 @@
+{
+  "name": "pi-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm dev:client & pnpm dev:server",
+    "dev:client": "vite --config vite.client.config.ts",
+    "dev:server": "node --watch server/index.ts",
+    "build": "tsc -b && vite build --config vite.client.config.ts && vite build --config vite.server.config.ts",
+    "build:client": "vite build --config vite.client.config.ts",
+    "build:server": "vite build --config vite.server.config.ts",
+    "start": "node dist/server/index.js",
+    "lint": "eslint .",
+    "preview": "vite preview --config vite.client.config.ts"
+  },
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "^0.84.4",
+    "@fastify/cors": "^11.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "fastify": "^5.12.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@eslint/js": "^10.0.1",
+    "@rolldown/plugin-babel": "^0.2.3",
+    "@types/babel__core": "^7.20.5",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.1.0",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "eslint": "^10.9.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.4",
+    "globals": "^17.11.0",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.67.0",
+    "vite": "^8.2.2"
+  }
+}
