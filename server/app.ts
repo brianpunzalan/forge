@@ -1,39 +1,21 @@
-import { startServer } from './server.ts'
-import { startAgentSession, type AgentSession } from './agent-session.ts'
+import { createAgentSession } from './agent-session.ts'
+import { createWebServer } from './web-server.ts'
 
-import type { Server } from './server.ts'
-import { AppException } from './exceptions/AppException.ts';
+export const App = async () => {
+  const agentSession = await createAgentSession()
+  const server = createWebServer()
 
-export class App {
-    private ready: boolean = false;
-    private server: Server | null = null;
-    private agentSession: AgentSession | null = null;
+  server.get('/hello', (req, reply) => {
+    console.log(agentSession.session.model)
+    const body = req.body as { message?: string }
+    const message = body?.message ?? 'Ping'
+    agentSession.session.prompt(message, { streamingBehavior: 'steer' })
+    reply.send({ success: true })
+  })
 
-    constructor() {
-        this.ready = false;
+  server.listen({ port: 3000 }, function (err) {
+    if (err) {
+      server.log.error(err)
     }
-
-    public async init() {
-        try {
-            this.server = await startServer();
-            const { session } = await startAgentSession();
-            this.agentSession = session;
-            this.ready = true;
-        } catch (error) {
-            console.error(error);
-            throw new AppException("Unable to initialize application");
-        }
-    }
-
-    public isReady() {
-        return this.ready;
-    }
-
-    public getServer() {
-        return this.server;
-    }
-
-    public getAgentSession() {
-        return this.agentSession;
-    }
+  })
 }

@@ -1,19 +1,25 @@
-import { createAgentSession, ModelRuntime, SessionManager, AgentSession } from '@earendil-works/pi-coding-agent'
+import {
+  createAgentSession as __createAgentSession,
+  ModelRuntime,
+  SessionManager,
+  AgentSession,
+  type CreateAgentSessionResult,
+} from '@earendil-works/pi-coding-agent'
 
-export const startAgentSession = async () => {
-    const modelRuntime = await ModelRuntime.create();
+export const createAgentSession = async () => {
+  const modelRuntime = await ModelRuntime.create()
 
-    const { extensionsResult, session, modelFallbackMessage } = await createAgentSession({
-        sessionManager: SessionManager.inMemory(),
-        modelRuntime,
+  const { extensionsResult, session, modelFallbackMessage } =
+    await __createAgentSession({
+      sessionManager: SessionManager.inMemory(),
+      modelRuntime,
     })
 
-    return {
-        modelRuntime,
-        extensionsResult,
-        session,
-        modelFallbackMessage
-    }
+  return {
+    extensionsResult,
+    session,
+    modelFallbackMessage,
+  }
 }
 
-export type { AgentSession }
+export type { AgentSession, CreateAgentSessionResult }

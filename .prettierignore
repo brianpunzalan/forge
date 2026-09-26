@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+client/dist
+server/dist
+
+# Generated files
+client/src/routeTree.gen.ts
+.tanstack
+
+# Lockfiles
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Logs
+*.log
+logs
+
+# Misc
+*.local
+.DS_Store
+coverage
