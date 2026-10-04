@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Link } from '@tanstack/react-router'
 import {
   ChatCircleDotsIcon,
   DotsThreeIcon,
@@ -30,11 +31,9 @@ import { Button } from './ui/button'
 const chatData = [
   {
     title: 'News brief JSON review',
-    url: '#',
   },
   {
     title: 'Plant based meat for gout',
-    url: '#',
   },
 ]
 
@@ -100,7 +99,7 @@ export function HomeSidebar({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    render={<a href={item.url} />}
+                    render={<Link to="/app" search={{ q: item.title }} />}
                   >
                     <ChatCircleDotsIcon />
                     <span>{item.title}</span>

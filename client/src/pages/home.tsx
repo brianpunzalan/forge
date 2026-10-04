@@ -10,6 +10,7 @@ import {
   SparkleIcon,
 } from '@phosphor-icons/react'
 import { HomeSidebar } from '#/components/home-sidebar'
+import { MobileSidebarTrigger } from '#/components/mobile-sidebar-trigger'
 import { Button } from '#/components/ui/button'
 import { SidebarInset, SidebarProvider } from '#/components/ui/sidebar'
 import logoSrc from '#/assets/logo.png'
@@ -42,7 +43,12 @@ export default function Page() {
   return (
     <SidebarProvider>
       <HomeSidebar />
-      <SidebarInset className="relative isolate overflow-hidden">
+      <SidebarInset className="relative isolate">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-sm md:hidden">
+          <MobileSidebarTrigger />
+          <span className="text-sm font-semibold">Forge</span>
+        </header>
+
         {/* Soft ambient glow behind the composer */}
         <div
           aria-hidden
@@ -52,7 +58,7 @@ export default function Page() {
           <div className="absolute -right-24 bottom-0 size-80 rounded-full bg-primary/5 blur-3xl" />
         </div>
 
-        <div className="flex min-h-svh flex-1 flex-col items-center justify-center gap-10 px-4 py-16">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-10 px-4 py-16">
           <div className="flex flex-col items-center gap-5 text-center">
             <div className="flex size-14 items-center justify-center rounded-2xl border bg-card shadow-sm">
               <img src={logoSrc} alt="Forge" className="size-8" />

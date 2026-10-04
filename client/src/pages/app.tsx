@@ -10,6 +10,7 @@ import { cn } from 'cn'
 import { AppPreview } from '#/components/app-preview'
 import { AppSidebar } from '#/components/app-sidebar'
 import { CodePreview } from '#/components/code-preview'
+import { MobileSidebarTrigger } from '#/components/mobile-sidebar-trigger'
 import { Button } from '#/components/ui/button'
 import { SidebarInset, SidebarProvider } from '#/components/ui/sidebar'
 
@@ -24,6 +25,7 @@ export default function Page({ prompt }: { prompt?: string }) {
       <AppSidebar key={prompt} prompt={prompt} />
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-sm">
+          <MobileSidebarTrigger className="-ml-1 md:hidden" />
           <div className="flex items-center gap-2 text-sm">
             <span className="font-medium">
               {view === 'code' ? 'Code' : 'Preview'}
