@@ -32,6 +32,7 @@
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",
     "fastify": "^5.12.1",
+    "prism-react-renderer": "^2.4.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "shadcn": "^4.21.0",

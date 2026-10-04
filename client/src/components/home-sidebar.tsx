@@ -1,20 +1,29 @@
 import * as React from 'react'
-import { PlusCircleIcon } from '@phosphor-icons/react'
-import { SearchForm } from '#components/search-form'
+import {
+  ChatCircleDotsIcon,
+  DotsThreeIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+} from '@phosphor-icons/react'
+import { NavUser } from '#/components/nav-user'
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarSeparator,
   SidebarTrigger,
   useSidebar,
-} from '#components/ui/sidebar'
+} from '#/components/ui/sidebar'
 import logoSrc from '#/assets/logo.png'
 import { Button } from './ui/button'
 
@@ -37,66 +46,80 @@ const SidebarHeaderTrigger = () => {
       <Button
         data-sidebar="trigger"
         data-slot="sidebar-trigger"
-        variant="outline"
+        variant="ghost"
         size="icon-sm"
-        className="p-1 cursor-e-resize"
+        className="cursor-e-resize"
         onClick={() => toggleSidebar()}
       >
-        <img src={logoSrc} alt="Forge" className="size-full" />
+        <img src={logoSrc} alt="Forge" className="size-5 rounded" />
       </Button>
     )
   }
 
   return (
-    <header className="inline-flex justify-between group-data-[state=collapsed]:justify-center items-center">
-      <div className="group-data-[state=collapsed]:hidden inline-flex gap-2 items-center">
-        <img
-          src={logoSrc}
-          alt="Forge"
-          className="p-1 size-7 group-data-[state=collapsed]:w-full"
-        />{' '}
-        <span className="leading-3.5">Forge</span>
-      </div>
-      <SidebarTrigger className="-ml-1" />
-    </header>
+    <div className="flex items-center gap-2 px-1">
+      <img src={logoSrc} alt="Forge" className="size-7 rounded-lg" />
+      <span className="text-sm font-semibold">Forge</span>
+      <SidebarTrigger className="ml-auto" />
+    </div>
   )
 }
 
 export function HomeSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const { state } = useSidebar()
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarHeaderTrigger />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarMenuItem>
-            <SidebarMenuButton render={<a href="#" />}>
-              <PlusCircleIcon size={32} /> New Chat
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+        <SidebarGroup className="pt-0">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip="New chat" className="font-medium">
+                <PlusIcon weight="bold" />
+                <span>New chat</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarGroup>
-        {state === 'expanded' && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Chats</SidebarGroupLabel>
-            <SidebarGroupContent>
-              {/* <SearchForm /> */}
-              <SidebarMenu>
-                {chatData.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton render={<a href={item.url} />}>
-                      {item.title}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+        <SidebarSeparator />
+        <SidebarGroup>
+          <SidebarGroupLabel>Chats</SidebarGroupLabel>
+          <SidebarGroupAction
+            aria-label="Search chats"
+            title="Search chats"
+            className="hover:bg-sidebar-accent"
+          >
+            <MagnifyingGlassIcon />
+          </SidebarGroupAction>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {chatData.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    render={<a href={item.url} />}
+                  >
+                    <ChatCircleDotsIcon />
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                  <SidebarMenuAction
+                    showOnHover
+                    aria-label={`Options for ${item.title}`}
+                  >
+                    <DotsThreeIcon weight="bold" />
+                  </SidebarMenuAction>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )
