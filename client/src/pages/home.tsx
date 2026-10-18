@@ -13,6 +13,12 @@ import { HomeSidebar } from '#/components/home-sidebar'
 import { MobileSidebarTrigger } from '#/components/mobile-sidebar-trigger'
 import { Button } from '#/components/ui/button'
 import { SidebarInset, SidebarProvider } from '#/components/ui/sidebar'
+import {
+  createSession,
+  getSeenMessages,
+  listSessions,
+  type SessionSummary,
+} from '#/lib/forge-api'
 import logoSrc from '#/assets/logo.png'
 
 const suggestions = [
@@ -24,13 +30,50 @@ const suggestions = [
 
 export default function Page() {
   const navigate = useNavigate()
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+  const [sessions, setSessions] = React.useState<SessionSummary[]>([])
+  const [busy, setBusy] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const reload = React.useCallback(() => {
+    void listSessions()
+      .then((list) => setSessions(list))
+      .catch(() => {})
+  }, [])
+
+  React.useEffect(() => {
+    reload()
+    const timer = setInterval(reload, 4000)
+    return () => clearInterval(timer)
+  }, [reload])
+
+  const sessionsWithUnread = sessions.map((session) => ({
+    ...session,
+    unread: Math.max(0, session.messageCount - getSeenMessages(session.id)),
+  }))
+
+  const handleNewChat = () => {
+    const node = textareaRef.current
+    if (node) {
+      node.value = ''
+      node.focus()
+    }
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const prompt = String(data.get('prompt') ?? '').trim()
-    if (!prompt) return
-    navigate({ to: '/app', search: { q: prompt } })
+    if (!prompt || busy) return
+    setBusy(true)
+    setError(null)
+    try {
+      const { id } = await createSession(prompt)
+      navigate({ to: '/session/$sessionId', params: { sessionId: id } })
+    } catch (err) {
+      setError(String(err instanceof Error ? err.message : err))
+      setBusy(false)
+    }
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -42,7 +85,11 @@ export default function Page() {
 
   return (
     <SidebarProvider>
-      <HomeSidebar />
+      <HomeSidebar
+        sessions={sessionsWithUnread}
+        onNewChat={handleNewChat}
+        onRefresh={reload}
+      />
       <SidebarInset className="relative isolate">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-sm md:hidden">
           <MobileSidebarTrigger />
@@ -75,11 +122,15 @@ export default function Page() {
           </div>
 
           <form onSubmit={handleSubmit} className="w-full max-w-2xl">
+            {error && (
+              <p className="mb-2 text-center text-sm text-destructive">{error}</p>
+            )}
             <div className="rounded-3xl border bg-card p-2 shadow-sm transition-shadow focus-within:border-ring/60 focus-within:shadow-md">
               <label htmlFor="prompt" className="sr-only">
                 Ask me anything
               </label>
               <textarea
+                ref={textareaRef}
                 id="prompt"
                 name="prompt"
                 rows={2}
@@ -101,9 +152,14 @@ export default function Page() {
                   type="submit"
                   size="icon-sm"
                   className="rounded-full"
+                  disabled={busy}
                   aria-label="Send message"
                 >
-                  <ArrowUpIcon weight="bold" />
+                  {busy ? (
+                    <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  ) : (
+                    <ArrowUpIcon weight="bold" />
+                  )}
                 </Button>
               </div>
             </div>

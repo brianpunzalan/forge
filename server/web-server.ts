@@ -1,22 +1,19 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
+import { registerSessionRoutes } from './routes/sessions.ts'
+import type { SessionManager } from './session-manager.ts'
 
-export const createWebServer = () => {
-  const server = Fastify({
-    logger: true,
-  })
+export type Server = Fastify.FastifyInstance
 
-  server.listen({ port: 3000 }, function (err) {
-    if (err) {
-      server.log.error(err)
-    }
-  })
+export function createWebServer(deps: { manager: SessionManager }): Server {
+  const server = Fastify({ logger: true })
 
   server.register(cors, {
-    origin: '*',
+    origin: true,
+    credentials: true,
   })
+
+  registerSessionRoutes(server, deps)
 
   return server
 }
-
-export type Server = Fastify.FastifyInstance

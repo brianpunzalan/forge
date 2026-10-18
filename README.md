@@ -1,3 +1,29 @@
+# Forge
+
+Software factory that generates UI-only apps with the Pi coding agent, run inside a
+Gondolin micro-VM sandbox. Architecture: [`docs/forge-architecture.md`](./docs/forge-architecture.md),
+flows: [`docs/forge-flows.md`](./docs/forge-flows.md).
+
+## Development
+
+```bash
+# 1. Start Postgres (skip for the in-memory store)
+docker compose up -d db
+
+# 2. Configure environment
+cp .env.example .env   # then add your BYOK model key (ANTHROPIC_API_KEY, etc.)
+
+# 3. Run server + client
+pnpm install
+pnpm dev:server   # Fastify control plane on :3000
+pnpm dev:client   # Vite web UI on :5173
+```
+
+The server reads `.env` automatically (`--env-file-if-exists`). Without `DATABASE_URL`
+it falls back to an in-memory store. Requirements: Node >= 22.19 and QEMU (for the sandbox).
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

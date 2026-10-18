@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Environment
+.env
+.env.local
+
+# Forge runtime data (workspaces + sessions)
+.forge
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

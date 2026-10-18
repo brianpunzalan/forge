@@ -1,129 +1,98 @@
 import * as React from 'react'
-import {
-  ArrowSquareOutIcon,
-  CodeIcon,
-  DeviceMobileIcon,
-  EyeIcon,
-  MonitorIcon,
-} from '@phosphor-icons/react'
-import { cn } from 'cn'
-import { AppPreview } from '#/components/app-preview'
-import { AppSidebar } from '#/components/app-sidebar'
-import { CodePreview } from '#/components/code-preview'
-import { MobileSidebarTrigger } from '#/components/mobile-sidebar-trigger'
-import { Button } from '#/components/ui/button'
-import { SidebarInset, SidebarProvider } from '#/components/ui/sidebar'
+import { Link } from '@tanstack/react-router'
+import { ArrowSquareOutIcon, CodeIcon, EyeIcon } from '@phosphor-icons/react'
+import { ForgeChat } from '#/components/forge-chat'
+import { ForgeCode } from '#/components/forge-code'
+import { useForgeSession } from '#/hooks/use-forge-session'
+import logoSrc from '#/assets/logo.png'
 
-export default function Page({ prompt }: { prompt?: string }) {
+export default function Page({ sessionId }: { sessionId: string }) {
+  const session = useForgeSession(sessionId)
   const [view, setView] = React.useState<'preview' | 'code'>('preview')
-  const [device, setDevice] = React.useState<'desktop' | 'mobile'>('desktop')
+
+  const statusLabel = {
+    connecting: 'Starting sandbox…',
+    running: 'Building…',
+    idle: 'Idle',
+    reconnecting: 'Reconnecting…',
+    stopped: 'Stopped',
+    degraded: 'Degraded',
+    error: 'Error',
+  }[session.status] ?? session.status
 
   return (
-    <SidebarProvider
-      style={{ '--sidebar-width': '20rem' } as React.CSSProperties}
-    >
-      <AppSidebar key={prompt} prompt={prompt} />
-      <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur-sm">
-          <MobileSidebarTrigger className="-ml-1 md:hidden" />
-          <div className="flex items-center gap-2 text-sm">
-            <span className="font-medium">
-              {view === 'code' ? 'Code' : 'Preview'}
-            </span>
-            {view === 'preview' && (
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="text-muted-foreground"
-                aria-label="Open preview in a new window"
-                title="Open preview in a new window"
-              >
-                <ArrowSquareOutIcon />
-              </Button>
-            )}
-            <span className="text-muted-foreground">·</span>
-            <span className="hidden text-muted-foreground sm:inline">
-              {view === 'code' ? 'Read-only' : 'localhost:5173'}
-            </span>
+    <div className="flex h-screen min-h-0 bg-background">
+      <aside className="flex w-80 shrink-0 flex-col border-r">
+        <div className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
+          <Link to="/" aria-label="Back to home" className="shrink-0">
+            <img src={logoSrc} alt="Forge" className="size-6 rounded" />
+          </Link>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold">Forge</p>
+            <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="size-1.5 rounded-full bg-primary" />
+              {session.phase ?? statusLabel}
+            </p>
           </div>
-          <div className="ml-auto flex items-center gap-1.5">
-            {view === 'preview' && (
-              <div className="hidden items-center rounded-md border p-0.5 sm:flex">
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className={cn(
-                    'rounded-sm',
-                    device === 'desktop' && 'bg-muted',
-                  )}
-                  aria-label="Desktop preview"
-                  aria-pressed={device === 'desktop'}
-                  onClick={() => setDevice('desktop')}
-                >
-                  <MonitorIcon />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  className={cn(
-                    'rounded-sm',
-                    device === 'mobile' && 'bg-muted',
-                  )}
-                  aria-label="Mobile preview"
-                  aria-pressed={device === 'mobile'}
-                  onClick={() => setDevice('mobile')}
-                >
-                  <DeviceMobileIcon />
-                </Button>
-              </div>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="px-3"
-              onClick={() =>
-                setView((prev) => (prev === 'code' ? 'preview' : 'code'))
-              }
+        </div>
+        <div className="min-h-0 flex-1">
+          <ForgeChat
+            items={session.items}
+            status={session.status}
+            onSend={session.send}
+            onAbort={session.abort}
+          />
+        </div>
+      </aside>
+
+      <main className="flex min-w-0 flex-1 flex-col">
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+          <span className="text-sm font-medium">{view === 'code' ? 'Code' : 'Preview'}</span>
+          {view === 'preview' && session.previewUrl && (
+            <a
+              href={session.previewUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Open preview in a new window"
+              title="Open preview in a new window"
             >
-              {view === 'code' ? <EyeIcon /> : <CodeIcon />}
-              <span className="hidden sm:inline">
-                {view === 'code' ? 'Preview' : 'Code'}
-              </span>
-            </Button>
-          </div>
+              <ArrowSquareOutIcon className="size-4" />
+            </a>
+          )}
+          <span className="text-muted-foreground">·</span>
+          <span className="truncate text-muted-foreground">
+            {view === 'code' ? 'Read-only' : (session.previewUrl ?? 'preview starting…')}
+          </span>
+          <button
+            type="button"
+            onClick={() => setView((v) => (v === 'code' ? 'preview' : 'code'))}
+            className="ml-auto flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm"
+          >
+            {view === 'code' ? <EyeIcon className="size-4" /> : <CodeIcon className="size-4" />}
+            {view === 'code' ? 'Preview' : 'Code'}
+          </button>
         </header>
 
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-hidden">
           {view === 'code' ? (
-            <CodePreview />
-          ) : device === 'mobile' ? (
-            <div className="flex flex-1 justify-center overflow-auto bg-muted/20 p-6">
-              <div className="w-full max-w-[380px] self-start">
-                <div className="rounded-[2.5rem] border-[10px] border-neutral-900 bg-neutral-900 shadow-2xl">
-                  <div className="@container flex h-[720px] flex-col overflow-hidden rounded-[1.8rem] bg-background">
-                    <div className="relative flex h-8 shrink-0 items-center justify-between px-5 text-[10px] font-semibold">
-                      <span>9:41</span>
-                      <span className="absolute top-1.5 left-1/2 h-4 w-20 -translate-x-1/2 rounded-full bg-neutral-900" />
-                      <span className="flex items-center gap-1 text-muted-foreground">
-                        <span className="size-1.5 rounded-full bg-current" />
-                        <span className="size-1.5 rounded-full bg-current opacity-60" />
-                        <span className="h-2 w-4 rounded-sm border border-current" />
-                      </span>
-                    </div>
-                    <div className="flex-1 overflow-y-auto">
-                      <AppPreview />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ForgeCode files={session.files} readFile={session.readFile} />
+          ) : session.previewUrl ? (
+            <iframe
+              src={session.previewUrl}
+              title="Preview"
+              className="size-full border-0 bg-white"
+            />
           ) : (
-            <div className="@container flex-1 overflow-auto">
-              <AppPreview />
+            <div className="flex h-full flex-col items-center justify-center gap-2 px-6 text-center text-sm text-muted-foreground">
+              {session.error ? (
+                <span className="text-destructive">{session.error}</span>
+              ) : null}
+              <span>{session.notice ?? 'The preview will appear here once the app builds.'}</span>
             </div>
           )}
         </div>
-      </SidebarInset>
-    </SidebarProvider>
+      </main>
+    </div>
   )
 }
