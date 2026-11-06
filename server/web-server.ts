@@ -11,6 +11,7 @@ export function createWebServer(deps: { manager: SessionManager }): Server {
   server.register(cors, {
     origin: true,
     credentials: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   })
 
   registerSessionRoutes(server, deps)

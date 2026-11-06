@@ -110,6 +110,7 @@ export function HomeSidebar({
   const [selected, setSelected] = React.useState<Set<string>>(new Set())
   const [menu, setMenu] = React.useState<{ x: number; y: number; ids: string[] } | null>(null)
   const [deleting, setDeleting] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
   const filtered = query.trim()
     ? sessions.filter((s) =>
@@ -142,12 +143,13 @@ export function HomeSidebar({
   const doDelete = async (ids: string[]) => {
     setMenu(null)
     setDeleting(true)
+    setError(null)
     try {
       await deleteSessions(ids)
       setSelected(new Set())
       onRefresh()
-    } catch {
-      // ignore; list refresh will reflect reality
+    } catch (err) {
+      setError(String(err instanceof Error ? err.message : err))
     } finally {
       setDeleting(false)
     }
@@ -209,6 +211,13 @@ export function HomeSidebar({
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search chats…"
               />
+            </div>
+          )}
+          {error && (
+            <div className="px-2 pb-1">
+              <p className="rounded-md bg-destructive/10 px-2 py-1 text-[11px] text-destructive">
+                {error}
+              </p>
             </div>
           )}
           {selected.size > 0 && (

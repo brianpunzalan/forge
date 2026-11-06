@@ -68,10 +68,8 @@ export async function deleteSession(id: string): Promise<void> {
 
 export async function deleteSessions(ids: string[]): Promise<void> {
   if (ids.length === 0) return
-  if (ids.length === 1) {
-    await deleteSession(ids[0])
-    return
-  }
+  // Always use the POST bulk-delete endpoint (even for one id) so deletes never
+  // trigger a DELETE CORS preflight.
   const res = await jsonFetch('/sessions/bulk-delete', {
     method: 'POST',
     body: JSON.stringify({ ids }),

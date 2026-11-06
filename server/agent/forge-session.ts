@@ -435,11 +435,14 @@ export class ForgeSession {
 
   private async stopPreview(): Promise<void> {
     if (this.proxy) {
-      await this.proxy.stop().catch(() => {})
+      await withTimeout(this.proxy.stop(), 5000).catch(() => {})
       this.proxy = null
     }
     if (this.devPid && this.vm) {
-      await this.vm.exec(`kill ${this.devPid} 2>/dev/null || true`).catch(() => {})
+      await withTimeout(
+        this.vm.exec(`kill ${this.devPid} 2>/dev/null || true`),
+        5000,
+      ).catch(() => {})
       this.devPid = null
     }
     if (this.previewUrl) {
@@ -526,9 +529,10 @@ export class ForgeSession {
     }
     this.agentSession = null
 
-    await this.stopPreview()
+    // Teardown must never hang: bound each cleanup step.
+    await withTimeout(this.stopPreview(), 10_000).catch(() => {})
     if (this.vm) {
-      await this.vm.close().catch(() => {})
+      await withTimeout(this.vm.close(), 10_000).catch(() => {})
       this.vm = null
     }
     this.watcher?.close()
@@ -558,4 +562,14 @@ function detectPackageManager(dir: string): 'pnpm' | 'npm' | 'yarn' {
   if (fs.existsSync(path.join(dir, 'pnpm-lock.yaml'))) return 'pnpm'
   if (fs.existsSync(path.join(dir, 'yarn.lock'))) return 'yarn'
   return 'npm'
+}
+
+function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise<never>((_, reject) => {
+      const timer = setTimeout(() => reject(new Error(`timeout after ${ms}ms`)), ms)
+      timer.unref?.()
+    }),
+  ])
 }

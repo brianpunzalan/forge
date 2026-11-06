@@ -20,7 +20,7 @@ export const App = async () => {
   // A fresh process owns no live sessions: mark any non-stopped record from a
   // previous (possibly killed) process as stopped so the DB status stays honest.
   const orphaned = (await store.listSessions()).filter(
-    (s) => s.status !== 'stopped' && s.status !== 'stopping',
+    (s) => s.status !== 'stopped',
   )
   for (const s of orphaned) {
     await store.updateSession(s.id, { status: 'stopped' })

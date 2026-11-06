@@ -48,7 +48,13 @@ export class PreviewProxy {
     for (const client of this.wss?.clients ?? []) client.terminate()
     this.wss?.close()
     if (this.server) {
-      await new Promise<void>((resolve) => this.server!.close(() => resolve()))
+      // Force-close keep-alive connections (e.g. the preview iframe) so
+      // server.close() can complete instead of hanging forever.
+      this.server.closeAllConnections?.()
+      await Promise.race([
+        new Promise<void>((resolve) => this.server!.close(() => resolve())),
+        new Promise<void>((resolve) => setTimeout(resolve, 3000)),
+      ])
     }
     this.server = null
     this.wss = null
